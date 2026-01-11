@@ -5,7 +5,7 @@ resource "google_cloudbuild_trigger" "im_apply" {
   service_account = google_service_account.cb_sa.id
 
   repository_event_config {
-    repository = google_cloudbuildv2_repository.infra_repo.id
+    repository = google_cloudbuildv2_repository.github_repo.id
     push {
       branch = "^main$"
     }
@@ -52,7 +52,7 @@ resource "google_cloudbuild_trigger" "im_preview" {
   service_account = google_service_account.cb_sa.id
 
   repository_event_config {
-    repository = google_cloudbuildv2_repository.infra_repo.id
+    repository = google_cloudbuildv2_repository.github_repo.id
     pull_request {
       branch = "^main$"
     }
