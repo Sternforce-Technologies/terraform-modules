@@ -1,5 +1,5 @@
 terraform {
-  required_version = var.tf_version
+  required_version = "=> 1.3.10"
 
   required_providers {
     google = {
