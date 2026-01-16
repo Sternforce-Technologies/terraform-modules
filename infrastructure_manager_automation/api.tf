@@ -1,19 +1,26 @@
-resource "google_project_service" "secret_manager_api" {
-  project = var.project_id
-  service = "secretmanager.googleapis.com"
+locals {
+  enabled_apis = [
+    "artifactregistry.googleapis.com",
+    "bigquery.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "config.googleapis.com",
+    "container.googleapis.com",
+    "eventarc.googleapis.com",
+    "gkeconnect.googleapis.com",
+    "gkehub.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "multiclustermetering.googleapis.com",
+    "pubsub.googleapis.com",
+    "run.googleapis.com",
+    "secretmanager.googleapis.com",
+    "source.googleapis.com",
+  ]
 }
 
-resource "google_project_service" "configuration_manager_api" {
-  project = var.project_id
-  service = "config.googleapis.com"
-}
-
-resource "google_project_service" "cloud_resource_manager_api" {
-  project = var.project_id
-  service = "cloudresourcemanager.googleapis.com"
-}
-
-resource "google_project_service" "pubsub_api" {
-	project = var.project_id
-	service = "pubsub.googleapis.com"
+resource "google_project_service" "gcp_services" {
+  for_each = toset(local.enabled_apis)
+  project  = var.project_id
+  service  = each.key
 }
