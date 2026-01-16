@@ -19,6 +19,26 @@ locals {
   ]
 }
 
+moved {
+  from = module.infrastructure_manager_automation.google_project_service.configuration_manager_api
+  to   = module.infrastructure_manager_automation.google_project_service.gcp_services["config.googleapis.com"]
+}
+
+moved {
+  from = module.infrastructure_manager_automation.google_project_service.pubsub_api
+  to   = module.infrastructure_manager_automation.google_project_service.gcp_services["pubsub.googleapis.com"]
+}
+
+moved {
+  from = module.infrastructure_manager_automation.google_project_service.cloud_resource_manager_api
+  to   = module.infrastructure_manager_automation.google_project_service.gcp_services["cloudresourcemanager.googleapis.com"]
+}
+
+moved {
+  from = module.infrastructure_manager_automation.google_project_service.secret_manager_api
+  to   = module.infrastructure_manager_automation.google_project_service.gcp_services["secretmanager.googleapis.com"]
+}
+
 resource "google_project_service" "gcp_services" {
   for_each = toset(local.enabled_apis)
   project  = var.project_id
