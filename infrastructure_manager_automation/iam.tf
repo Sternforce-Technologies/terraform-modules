@@ -14,6 +14,12 @@ resource "google_service_account" "cb_sa" {
   project      = var.project_id
 }
 
+resource "google_service_account" "im_auditor_sa" {
+  account_id   = "${var.deployment_id}-im-auditor-sa"
+  display_name = "Infrastructure Manager Auditor Service Account"
+  project      = var.project_id
+}
+
 # Permissions for the Infrastructure Manager service account
 # This SA is used by the 'gcloud infra-manager' commands to deploy resources.
 
@@ -84,6 +90,44 @@ resource "google_secret_manager_secret_iam_member" "cb_secret_accessor" {
   secret_id = var.github_pat_secret_name
   role      = "roles/editor"
   member    = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
+# Permissions for the Infrastructure Manager Auditor service account (im_auditor_sa)
+# This SA is used by the 'gcloud infra-manager' commands to audit resources.
+
+# Grant Infra Manager Viewer to see Terraform state
+resource "google_project_iam_member" "im_auditor_role_config_viewer" {
+  project = var.project_id
+  role    = "roles/config.viewer"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+}
+
+# Grant Asset Inventory Viewer to see actual state
+resource "google_project_iam_member" "im_auditor_role_cloudasset_viewer" {
+  project = var.project_id
+  role    = "roles/cloudasset.viewer"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+}
+
+# Grant Pub/Sub Publisher to send alerts
+resource "google_project_iam_member" "im_auditor_role_pubsub_publisher" {
+  project = var.project_id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+}
+
+# Grant BigQuery Data Editor to write to BQ tables
+resource "google_project_iam_member" "im_auditor_role_bigquery_dataeditor" {
+  project = var.project_id
+  role    = "roles/bigquery.dataEditor"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+}
+
+# Grant Logging Log Writer to write logs
+resource "google_project_iam_member" "im_auditor_role_logging_logwriter" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
 # Permissions for the Google-managed Cloud Build service agent
