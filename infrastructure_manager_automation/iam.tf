@@ -116,6 +116,13 @@ resource "google_project_iam_member" "im_auditor_role_cloudasset_viewer" {
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
+# Grant Cloud Build Connection User to access the repos
+resource "google_project_iam_member" "im_auditor_role_cloudasset_viewer" {
+  project = var.project_id
+  role    = "roles/cloudbuild.connectionUser"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+}
+
 # Grant Pub/Sub Publisher to send alerts
 resource "google_project_iam_member" "im_auditor_role_pubsub_publisher" {
   project = var.project_id
@@ -134,6 +141,13 @@ resource "google_project_iam_member" "im_auditor_role_bigquery_dataeditor" {
 resource "google_project_iam_member" "im_auditor_role_logging_logwriter" {
   project = var.project_id
   role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+}
+
+# Grant Secret Manager Secret Accessor to read secrets
+resource "google_project_iam_member" "im_auditor_role_secretmanager_secretaccessor" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
