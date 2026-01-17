@@ -97,6 +97,7 @@ resource "google_cloudbuild_trigger" "redeploy_on_push" {
   name        = "redeploy-auditor-on-push"
   location    = var.region
   project     = var.project_id  
+  service_account = google_service_account.cb_sa.id
 
   repository_event_config {
     repository = google_cloudbuildv2_repository.github_repo.id
