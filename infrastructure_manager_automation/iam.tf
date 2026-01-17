@@ -1,4 +1,4 @@
-zdata "google_project" "project" {
+data "google_project" "project" {
   project_id = var.project_id
 }
 
@@ -85,6 +85,7 @@ resource "google_project_iam_member" "cb_logging" {
 }
 
 # Allow cb_sa to access the PAT secret
+# should not be editor role here
 resource "google_secret_manager_secret_iam_member" "cb_secret_accessor" {
   project   = var.project_id
   secret_id = var.github_pat_secret_name
