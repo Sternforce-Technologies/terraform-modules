@@ -1,5 +1,6 @@
 resource "google_cloudfunctions2_function" "auditor_function" {
   name        = "im-global-auditor-go"
+  project    = var.project_id
   location    = var.region
   description = "Automated Auditor tracking Shadow IT via GitHub source"
 
