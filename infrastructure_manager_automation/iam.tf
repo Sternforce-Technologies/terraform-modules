@@ -116,10 +116,10 @@ resource "google_project_iam_member" "im_auditor_role_cloudasset_viewer" {
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
-# Grant Cloud Build Connection User to access the repos
-resource "google_project_iam_member" "im_auditor_role_cloudbuild_connectionuser" {
+# Grant Cloud Service Agent to access the repos
+resource "google_project_iam_member" "im_auditor_role_cloudbuild_service_agent" {
   project = var.project_id
-  role    = "roles/cloudbuild.connectionUser"
+  role    = "roles/cloudbuild.serviceAgent"
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
