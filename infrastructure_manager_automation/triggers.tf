@@ -92,3 +92,18 @@ resource "google_cloudbuild_trigger" "im_preview" {
 
   depends_on = [google_secret_manager_secret_iam_member.cb_secret_accessor]
 }
+
+resource "google_cloudbuild_trigger" "redeploy_on_push" {
+  name        = "redeploy-auditor-on-push"
+  location    = var.region
+  project     = var.project_id  
+
+  repository_event_config {
+    repository = google_cloudbuildv2_repository.github_repo.id
+    push {
+      branch = "^main$"
+    }
+  }
+  filename = "infrastructure_manager_automation/im-audit/files/cloudbuild.yaml"
+  included_files = ["infrastructure_manager_automation/im-audit/**"]
+}

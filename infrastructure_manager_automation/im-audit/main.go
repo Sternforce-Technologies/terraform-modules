@@ -54,7 +54,7 @@ func AuditResources(ctx context.Context, m interface{}) error {
 		}
         defer pubClient.Close()
 
-        // 2. Fetch Assets (Reality)
+        // Get Assets from Resource Manager
         realityMap := make(map[string]string)
         itAsset := assetClient.SearchAllResources(ctx, &assetpb.SearchAllResourcesRequest{
                 Scope: fmt.Sprintf("projects/%s", projectID),
@@ -66,7 +66,7 @@ func AuditResources(ctx context.Context, m interface{}) error {
                 realityMap[res.Name] = res.AssetType
         }
 
-        // 3. Fetch IM Managed (Intent) - HEAVILY DEFENSIVE
+        // Get Assets from Infrastructure Manager
         managedSet := make(map[string]bool)
         itDep := imClient.ListDeployments(ctx, &configpb.ListDeploymentsRequest{
                 Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
@@ -74,7 +74,9 @@ func AuditResources(ctx context.Context, m interface{}) error {
 
         for {
                 dep, err := itDep.Next()
-                if err == iterator.Done { break }
+                if err == iterator.Done { 
+					break 
+				}
                 if err != nil || dep == nil { break } // Panic prevention
 
                 // Safely fetch resources for the latest revision
@@ -96,7 +98,7 @@ func AuditResources(ctx context.Context, m interface{}) error {
                 }
         }
 
-        // 4. Comparison
+		// Compare and find unmanaged resources
         var rows []*ResourceRow
         var flaggedNames []string
         ignore := []string{"/networks/default", "serviceAccount:service-"}
@@ -114,7 +116,7 @@ func AuditResources(ctx context.Context, m interface{}) error {
                 }
         }
 
-        // 5. Output to BQ and PubSub
+        // Output to BQ and PubSub
         if len(rows) > 0 {
                 // Truncate table first
                 q := bqClient.Query("DELETE FROM `managed_governance.unmanaged_resources` WHERE true")
@@ -124,7 +126,7 @@ func AuditResources(ctx context.Context, m interface{}) error {
                 inserter := bqClient.Dataset("managed_governance").Table("unmanaged_resources").Inserter()
                 if err := inserter.Put(ctx, rows); err != nil { log.Printf("BQ insert error: %v", err) }
 
-                // Alert Josh
+                // Send Alerts to PubSub
                 data, _ := json.Marshal(flaggedNames)
                 pubClient.Topic(topicID).Publish(ctx, &pubsub.Message{Data: data})
 

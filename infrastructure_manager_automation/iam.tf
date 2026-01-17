@@ -95,6 +95,13 @@ resource "google_secret_manager_secret_iam_member" "cb_secret_accessor" {
 # Permissions for the Infrastructure Manager Auditor service account (im_auditor_sa)
 # This SA is used by the 'gcloud infra-manager' commands to audit resources.
 
+# Allow im_auditor_sa to act as im_sa
+resource "google_service_account_iam_member" "cloudbuild_sa_user" {
+  service_account_id = google_service_account.im_auditor_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
 # Grant Infra Manager Viewer to see Terraform state
 resource "google_project_iam_member" "im_auditor_role_config_viewer" {
   project = var.project_id
