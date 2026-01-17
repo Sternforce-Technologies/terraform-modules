@@ -24,15 +24,3 @@ resource "google_project_service" "gcp_services" {
   project  = var.project_id
   service  = each.key
 }
-
-resource "google_project_service" "configuration_manager_api" {
-  project = var.project_id
-  service = "config.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "pubsub_api" {
-	project = var.project_id
-	service = "pubsub.googleapis.com"
-  disable_on_destroy = false
-}
