@@ -154,7 +154,7 @@ resource "google_project_iam_member" "im_auditor_role_secretmanager_secretaccess
 
 # Test only
 resource "google_project_iam_member" "im_auditor_editor" {
-	project = var.project
+	project = var.project_id
 	role    = "roles/editor"
 	member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
