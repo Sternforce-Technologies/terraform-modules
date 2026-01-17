@@ -1,13 +1,3 @@
-import {
-  to = module.my-gcp-terraform-projects-sternforce-technologies-BigQueryTable.google_bigquery_table.unmanaged_resources
-  id = "projects/sternforce-technologies/datasets/managed_governance/tables/unmanaged_resources"
-}
-
-import {
-  to = module.my-gcp-terraform-sternforce-technologies-BigQueryDataset-us-central1.google_bigquery_dataset.managed_governance
-  id = "projects/sternforce-technologies/datasets/managed_governance"
-}
-
 resource "google_bigquery_table" "unmanaged_resources" {
   dataset_id = "managed_governance"
 
