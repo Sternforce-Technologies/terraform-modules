@@ -94,9 +94,9 @@ resource "google_cloudbuild_trigger" "im_preview" {
 }
 
 resource "google_cloudbuild_trigger" "redeploy_on_push" {
-  name        = "redeploy-auditor-on-push"
-  location    = var.region
-  project     = var.project_id  
+  name            = "redeploy-auditor-on-push"
+  location        = var.region
+  project         = var.project_id  
   service_account = google_service_account.cb_sa.id
 
   repository_event_config {
@@ -105,6 +105,10 @@ resource "google_cloudbuild_trigger" "redeploy_on_push" {
       branch = "^main$"
     }
   }
+
+  # Deployment instructions path
   filename = "infrastructure_manager_automation/im-audit/files/cloudbuild.yaml"
+  
+  # Only trigger if the auditor code changes
   included_files = ["infrastructure_manager_automation/im-audit/**"]
 }
