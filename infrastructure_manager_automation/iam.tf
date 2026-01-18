@@ -106,6 +106,24 @@ resource "google_project_iam_member" "im_auditor_role_bigquery_dataeditor" {
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
+# --- 6. Infrastructure Manager Service Agent Permissions ---
+
+# Fixes: "Caller does not have required permission to use project"
+resource "google_project_iam_member" "im_agent_usage" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-config.iam.gserviceaccount.com"
+}
+
+# Fixes: "Permission 'iam.serviceaccounts.actAs' denied" (Likely the next error you would hit)
+# Allows the Infra Manager Agent to run the build AS the im_sa
+resource "google_service_account_iam_member" "im_agent_actas_im_sa" {
+  service_account_id = google_service_account.im_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-config.iam.gserviceaccount.com"
+}
+
+
 # --- 6. Propagation Wait ---
 
 resource "time_sleep" "wait_for_iam" {
