@@ -152,13 +152,6 @@ resource "google_project_iam_member" "im_auditor_role_secretmanager_secretaccess
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
-# Test only
-resource "google_project_iam_member" "im_auditor_editor" {
-	project = var.project_id
-	role    = "roles/editor"
-	member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
-}
-
 # Permissions for the Google-managed Cloud Build service agent
 # This agent is used by the google_cloudbuildv2_connection resource.
 
@@ -167,22 +160,4 @@ resource "google_secret_manager_secret_iam_member" "gcp_default_sa_secret_access
   secret_id = var.github_pat_secret_name
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-### Test
-
-# 2. The Cloud Build Service Agent needs to be a "Service Agent"
-# This allows it to actually "perform" the build using managed connections
-resource "google_project_iam_member" "cloudbuild_service_agent_role" {
-  project = var.project_id
-  role    = "roles/cloudbuild.serviceAgent"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-# 3. The Cloud Functions Service Agent needs to act as the build account
-# This is the "handshake" that often fails
-resource "google_project_iam_member" "gcf_service_agent" {
-  project = var.project_id
-  role    = "roles/cloudfunctions.serviceAgent"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com"
 }
