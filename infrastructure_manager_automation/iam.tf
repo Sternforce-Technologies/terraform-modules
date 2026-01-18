@@ -161,3 +161,11 @@ resource "google_secret_manager_secret_iam_member" "gcp_default_sa_secret_access
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
+
+# testing only
+# editor
+resource "google_project_iam_member" "im_auditor_role_editor" {
+  project = var.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+}
