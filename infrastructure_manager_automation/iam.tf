@@ -1,4 +1,4 @@
-# Access project data to retrieve the project number
+# Access project data to retrieve the project number for service agent identities
 data "google_project" "project" {
   project_id = var.project_id
 }
@@ -23,54 +23,46 @@ resource "google_service_account" "im_auditor_sa" {
   project      = var.project_id
 }
 
-# --- Infrastructure Manager Permissions ---
+# --- Cloud Build PERMISSIONS (The Critical Fix) ---
 
-resource "google_project_iam_member" "im_role_config_admin" {
+# 1. Grant to the Project's DEFAULT Cloud Build Service Account (The Builder)
+# This account is often the "caller" referenced in your error message.
+resource "google_project_iam_member" "cb_default_usage_consumer" {
   project = var.project_id
-  role    = "roles/config.admin"
-  member  = "serviceAccount:${google_service_account.im_sa.email}"
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
-resource "google_project_iam_member" "im_sa_editor" {
+# 2. Grant to the Cloud Build ROBOT Service Agent (The Orchestrator)
+resource "google_project_iam_member" "cb_agent_usage_consumer" {
   project = var.project_id
-  role    = "roles/editor" # Recommended to tighten this later
-  member  = "serviceAccount:${google_service_account.im_sa.email}"
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
-# --- Cloud Build Robot Permissions (FIXED) ---
-
-# Robot Agent Role: Required for GitHub connection access
+# 3. Grant Service Agent role to the Robot (Required for GitHub Connection access)
 resource "google_project_iam_member" "cb_agent_robot" {
   project = var.project_id
   role    = "roles/cloudbuild.serviceAgent"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
-# Service Usage: Required to "consume" project APIs during build
-resource "google_project_iam_member" "cb_agent_usage" {
-  project = var.project_id
-  role    = "roles/serviceusage.serviceUsageConsumer"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
+# --- Cloud Functions Robot Permissions ---
 
-# Secret Accessor: Required to read the GitHub PAT token
-resource "google_secret_manager_secret_iam_member" "cb_agent_secret" {
-  project   = var.project_id
-  secret_id = var.github_pat_secret_name
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-# --- Cloud Functions Robot Permissions (FIXED) ---
-
-# GCF Robot Usage: Required for pre-flight build checks
+# Grant Service Usage Consumer to the GCF Robot
 resource "google_project_iam_member" "gcf_robot_usage" {
   project = var.project_id
   role    = "roles/serviceusage.serviceUsageConsumer"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcf-admin-robot.iam.gserviceaccount.com"
 }
 
-# --- Auditor SA Permissions ---
+# --- Auditor and Infrastructure Manager Permissions ---
+
+resource "google_project_iam_member" "im_role_config_admin" {
+  project = var.project_id
+  role    = "roles/config.admin"
+  member  = "serviceAccount:${google_service_account.im_sa.email}"
+}
 
 resource "google_project_iam_member" "im_auditor_role_cloudasset_viewer" {
   project = var.project_id
@@ -84,20 +76,23 @@ resource "google_project_iam_member" "im_auditor_role_bigquery_dataeditor" {
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
 
-resource "google_project_iam_member" "im_auditor_role_pubsub_publisher" {
-  project = var.project_id
-  role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+# Secret Accessor for the Robot (Required for Gen2 GitHub Connections)
+resource "google_secret_manager_secret_iam_member" "cb_agent_secret" {
+  project   = var.project_id
+  secret_id = var.github_pat_secret_name
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 # --- Mandatory Propagation Delay ---
 
 resource "time_sleep" "wait_for_iam" {
-  create_duration = "60s"
+  create_duration = "90s" # Increased to 90s to be absolutely safe for Service Usage propagation
 
   depends_on = [
+    google_project_iam_member.cb_default_usage_consumer,
+    google_project_iam_member.cb_agent_usage_consumer,
     google_project_iam_member.cb_agent_robot,
-    google_project_iam_member.cb_agent_usage,
     google_project_iam_member.gcf_robot_usage
   ]
 }

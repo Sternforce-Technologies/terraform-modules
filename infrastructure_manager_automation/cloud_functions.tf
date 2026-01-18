@@ -19,7 +19,7 @@ resource "google_cloudfunctions2_function" "auditor_function" {
   location    = var.region
   description = "Automated Auditor (Managed by GitHub Trigger)"
 
-  # Wait for IAM permissions to settle
+  # Mandatory wait for IAM permissions to propagate
   depends_on = [time_sleep.wait_for_iam]
 
   build_config {
@@ -53,7 +53,7 @@ resource "google_cloudfunctions2_function" "auditor_function" {
   }
 }
 
-# Allow Auditor SA to be invoked (Used for the Pub/Sub Push Subscription)
+# Allow Auditor SA to be invoked by the Pub/Sub OIDC token
 resource "google_cloudfunctions2_function_iam_member" "invoker" {
   project        = var.project_id
   location       = google_cloudfunctions2_function.auditor_function.location
