@@ -100,7 +100,7 @@ resource "google_cloudbuild_trigger" "redeploy_on_push" {
   service_account = google_service_account.cb_sa.id
 
   repository_event_config {
-    repository = google_cloudbuildv2_repository.github_repo.id
+    repository = google_cloudbuildv2_repository.github_module_repo.id
     push {
       branch = "^main$"
     }
