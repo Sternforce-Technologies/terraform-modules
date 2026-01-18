@@ -169,3 +169,23 @@ resource "google_project_iam_member" "im_auditor_role_editor" {
   role    = "roles/editor"
   member  = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
+
+resource "google_project_iam_member" "cb_usage_consumer" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# 2. Grant to the Cloud Build Service Agent (The "Robot")
+resource "google_project_iam_member" "cb_agent_usage_consumer" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+# 3. IMPORTANT: Cloud Build also needs to be a "Viewer" to see project metadata
+resource "google_project_iam_member" "cb_viewer" {
+  project = var.project_id
+  role    = "roles/viewer"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
