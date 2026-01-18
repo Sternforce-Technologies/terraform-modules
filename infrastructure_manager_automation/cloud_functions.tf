@@ -11,7 +11,7 @@ resource "google_cloudfunctions2_function" "auditor_function" {
     source {
       repo_source {
         project_id   = var.project_id
-        repo_name    = google_cloudbuildv2_repository.github_repo.name
+        repo_name    = google_cloudbuildv2_repository.github_module_repo.name
         branch_name  = "main"
         dir        = "infrastructure_manager_automation/im-audit"
       }
