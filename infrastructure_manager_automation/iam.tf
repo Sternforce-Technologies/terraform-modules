@@ -161,3 +161,10 @@ resource "google_secret_manager_secret_iam_member" "gcp_default_sa_secret_access
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
+
+# Allow cb_sa to act as a Build Worker (Read Storage, Write Registry, Write Logs)
+resource "google_project_iam_member" "cb_sa_builder" {
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${google_service_account.cb_sa.email}"
+}

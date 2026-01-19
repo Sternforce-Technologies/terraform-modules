@@ -24,6 +24,8 @@ resource "google_cloudfunctions2_function" "auditor_function" {
     runtime     = "go125"
     entry_point = "AuditResources"
 
+    service_account = google_service_account.cb_sa.id
+
     source {
       storage_source {
         bucket = google_storage_bucket.gcf_source_bucket.name
