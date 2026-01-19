@@ -192,3 +192,15 @@ resource "google_project_iam_member" "im_sa_eventarc_admin" {
   role    = "roles/eventarc.admin"
   member  = "serviceAccount:${google_service_account.im_sa.email}"
 }
+
+resource "time_sleep" "wait_for_permissions" {
+  create_duration = "60s"
+
+  depends_on = [
+    google_project_iam_member.im_sa_connection_admin,
+    google_project_iam_member.im_sa_eventarc_admin,
+    google_project_iam_member.im_sa_build_editor,
+    google_project_iam_member.im_sa_editor,
+    google_secret_manager_secret_iam_member.cb_secret_accessor
+  ]
+}

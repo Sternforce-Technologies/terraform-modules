@@ -20,7 +20,10 @@ resource "google_cloudbuildv2_repository" "github_repo" {
   parent_connection = google_cloudbuildv2_connection.github_connection.name
   remote_uri        = var.repo_url
 
-  depends_on = [google_cloudbuildv2_connection.github_connection]
+  depends_on = [
+    google_cloudbuildv2_connection.github_connection,
+    time_sleep.wait_for_permissions
+  ]
 }
 
 resource "google_cloudbuildv2_repository" "github_module_repo" {
@@ -30,5 +33,8 @@ resource "google_cloudbuildv2_repository" "github_module_repo" {
   parent_connection = google_cloudbuildv2_connection.github_connection.name
   remote_uri        = "https://github.com/Sternforce-Technologies/terraform-modules.git"
 
-  depends_on = [google_cloudbuildv2_connection.github_connection]
+  depends_on = [
+    google_cloudbuildv2_connection.github_connection,
+    time_sleep.wait_for_permissions
+  ]
 }
