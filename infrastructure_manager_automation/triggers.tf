@@ -44,6 +44,7 @@ resource "google_cloudbuild_trigger" "im_apply" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.cb_secret_accessor,
+    google_cloudbuildv2_repository.github_repo,
     time_sleep.wait_for_permissions
   ]
 }
@@ -95,6 +96,7 @@ resource "google_cloudbuild_trigger" "im_preview" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.cb_secret_accessor,
+    google_cloudbuildv2_repository.github_repo,
     time_sleep.wait_for_permissions
   ]
 }
@@ -119,6 +121,8 @@ resource "google_cloudbuild_trigger" "redeploy_on_push" {
   included_files = ["infrastructure_manager_automation/im-audit/**"]
 
   depends_on = [
+    google_secret_manager_secret_iam_member.cb_secret_accessor,
+    google_cloudbuildv2_repository.github_module_repo,
     time_sleep.wait_for_permissions
   ]
 }
