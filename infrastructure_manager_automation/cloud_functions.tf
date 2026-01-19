@@ -19,9 +19,6 @@ resource "google_cloudfunctions2_function" "auditor_function" {
   location    = var.region
   description = "Automated Auditor (Managed by GitHub Trigger)"
 
-  # Mandatory wait for IAM permissions to propagate
-  depends_on = [time_sleep.wait_for_iam]
-
   build_config {
     runtime     = "go125"
     entry_point = "AuditResources"
