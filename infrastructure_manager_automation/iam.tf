@@ -169,9 +169,17 @@ resource "google_project_iam_member" "cb_sa_builder" {
   member  = "serviceAccount:${google_service_account.cb_sa.email}"
 }
 
-# Explicitly grant Cloud Build Admin to im_sa to fix "connections.get" errors
-resource "google_project_iam_member" "im_sa_cb_admin" {
+# 1. Fixes "Permission cloudbuild.connections.get denied"
+# Allows the SA to manage/view Cloud Build v2 Connections (GitHub)
+resource "google_project_iam_member" "im_sa_connection_admin" {
   project = var.project_id
-  role    = "roles/cloudbuild.admin"
+  role    = "roles/cloudbuild.connectionAdmin"
+  member  = "serviceAccount:${google_service_account.im_sa.email}"
+}
+
+# 2. Ensures the SA can create and manage Builds
+resource "google_project_iam_member" "im_sa_build_editor" {
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.editor"
   member  = "serviceAccount:${google_service_account.im_sa.email}"
 }
