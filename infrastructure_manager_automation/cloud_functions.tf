@@ -1,6 +1,7 @@
 # 1. Bucket for initial placeholder code
 resource "google_storage_bucket" "gcf_source_bucket" {
   name                        = "${var.project_id}-gcf-source-bucket"
+  project                     = var.project_id
   location                    = var.region
   uniform_bucket_level_access = true
 }
