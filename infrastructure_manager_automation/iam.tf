@@ -183,3 +183,26 @@ resource "google_project_iam_member" "im_sa_build_editor" {
   role    = "roles/cloudbuild.builds.editor"
   member  = "serviceAccount:${google_service_account.im_sa.email}"
 }
+
+# --- ADD THESE TO iam.tf ---
+
+# Fixes: Permission 'cloudbuild.connections.get' denied
+resource "google_project_iam_member" "im_sa_connection_admin" {
+  project = var.project_id
+  role    = "roles/cloudbuild.connectionAdmin"
+  member  = "serviceAccount:${google_service_account.im_sa.email}"
+}
+
+# Fixes: Permission 'eventarc.triggers.create' denied (for Cloud Functions v2)
+resource "google_project_iam_member" "im_sa_eventarc_admin" {
+  project = var.project_id
+  role    = "roles/eventarc.admin"
+  member  = "serviceAccount:${google_service_account.im_sa.email}"
+}
+
+# General Cloud Build permissions
+resource "google_project_iam_member" "im_sa_build_editor" {
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.editor"
+  member  = "serviceAccount:${google_service_account.im_sa.email}"
+}
