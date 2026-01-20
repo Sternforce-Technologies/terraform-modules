@@ -8,9 +8,10 @@ resource "google_cloudfunctions2_function" "auditor_function" {
     runtime     = "go125"
     entry_point = "AuditResources"
 
-    service_account = google_service_account.cb_sa.source {
+    service_account = google_service_account.cb_sa.source
       
-    repo_source {
+    source {
+      repo_source {
         project_id   = var.project_id
         repo_name    = google_cloudbuildv2_repository.github_module_repo.name
         branch_name  = "main"
