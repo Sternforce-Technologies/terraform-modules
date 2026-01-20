@@ -1,19 +1,3 @@
-# 1. Bucket for initial placeholder code
-resource "google_storage_bucket" "gcf_source_bucket" {
-  name                        = "${var.project_id}-gcf-source-bucket"
-  project                     = var.project_id
-  location                    = var.region
-  uniform_bucket_level_access = true
-}
-
-# 2. Minimal placeholder zip
-resource "google_storage_bucket_object" "placeholder_zip" {
-  name    = "placeholder.zip"
-  bucket  = google_storage_bucket.gcf_source_bucket.name
-  content = " " # Sufficient to allow initial function creation
-}
-
-# 3. The Cloud Function
 resource "google_cloudfunctions2_function" "auditor_function" {
   name        = "im-global-auditor-go"
   project     = var.project_id
@@ -24,12 +8,13 @@ resource "google_cloudfunctions2_function" "auditor_function" {
     runtime     = "go125"
     entry_point = "AuditResources"
 
-    service_account = google_service_account.cb_sa.id
-
-    source {
-      storage_source {
-        bucket = google_storage_bucket.gcf_source_bucket.name
-        object = google_storage_bucket_object.placeholder_zip.name
+    service_account = google_service_account.cb_sa.source {
+      
+    repo_source {
+        project_id   = var.project_id
+        repo_name    = google_cloudbuildv2_repository.github_module_repo.name
+        branch_name  = "main"
+        dir        = "infrastructure_manager_automation/im-audit"
       }
     }
   }
