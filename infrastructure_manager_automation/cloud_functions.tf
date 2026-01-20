@@ -49,6 +49,7 @@ resource "google_cloudfunctions2_function" "auditor_function" {
     trigger_region = var.region
     event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
     pubsub_topic   = google_pubsub_topic.resource_audit_topic.id
+    service_account_email = google_service_account.im_auditor_sa.email
     retry_policy   = "RETRY_POLICY_RETRY"
   }
 }
