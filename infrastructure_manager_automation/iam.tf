@@ -200,6 +200,12 @@ resource "google_project_iam_member" "im_sa_eventarc_admin" {
   member  = "serviceAccount:${google_service_account.im_sa.email}"
 }
 
+resource "google_project_iam_member" "cb_sa_connection_admin" {
+  project = var.project_id
+  role    = "roles/cloudbuild.connectionAdmin"
+  member  = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
 resource "time_sleep" "wait_for_permissions" {
   create_duration = "60s"
 
