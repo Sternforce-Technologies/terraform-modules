@@ -37,6 +37,8 @@ resource "google_cloudfunctions2_function" "auditor_function" {
     service_account_email = google_service_account.im_auditor_sa.email
     retry_policy   = "RETRY_POLICY_RETRY"
   }
+
+  depends_on = [google_cloudbuildv2_repository.github_module_repo]
 }
 
 # Allow Auditor SA to be invoked by the Pub/Sub OIDC token
