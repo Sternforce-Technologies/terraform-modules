@@ -214,6 +214,25 @@ resource "google_service_account_iam_member" "cb_sa_impersonation" {
   member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
+####
+resource "google_service_account_iam_member" "cb_sa_impersonates_auditor" {
+  service_account_id = google_service_account.im_auditor_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
+resource "google_service_account_iam_member" "cb_legacy_robot_impersonation" {
+  service_account_id = google_service_account.cb_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_service_account_iam_member" "im_audit_sa_impersonation" {
+  service_account_id = google_service_account.im_auditor_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
 resource "time_sleep" "wait_for_permissions" {
   create_duration = "60s"
 
