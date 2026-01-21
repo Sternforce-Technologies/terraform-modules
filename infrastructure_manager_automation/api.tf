@@ -11,6 +11,8 @@ locals {
     "gkeconnect.googleapis.com",
     "gkehub.googleapis.com",
     "iamcredentials.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
     "multiclustermetering.googleapis.com",
     "pubsub.googleapis.com",
     "run.googleapis.com",

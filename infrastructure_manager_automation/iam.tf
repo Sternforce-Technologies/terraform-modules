@@ -233,6 +233,36 @@ resource "google_service_account_iam_member" "im_audit_sa_impersonation" {
   member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
+# --- NEW: REQUIRED DEPLOYMENT PERMISSIONS FOR cb-sa ---
+
+# Allow cb-sa to create/update Cloud Functions
+resource "google_project_iam_member" "cb_sa_cloudfunctions_developer" {
+  project = var.project_id
+  role    = "roles/cloudfunctions.developer"
+  member  = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
+# Allow cb-sa to create/update Cloud Run services (Required for Gen 2 Functions)
+resource "google_project_iam_member" "cb_sa_run_admin" {
+  project = var.project_id
+  role    = "roles/run.admin"
+  member  = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
+# Allow cb-sa to create/update Eventarc triggers
+resource "google_project_iam_member" "cb_sa_eventarc_admin" {
+  project = var.project_id
+  role    = "roles/eventarc.admin"
+  member  = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
+# Ensure cb-sa can use the Service Usage API (often needed for deployment checks)
+resource "google_project_iam_member" "cb_sa_serviceusage_consumer" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:${google_service_account.cb_sa.email}"
+}
+
 resource "time_sleep" "wait_for_permissions" {
   create_duration = "60s"
 
