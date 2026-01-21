@@ -15,3 +15,6 @@ steps:
 
 substitutions:
   _PROJECT_ID: sternforce-technologies
+
+options:
+  logging: CLOUD_LOGGING_ONLY
