@@ -214,6 +214,7 @@ resource "time_sleep" "wait_for_permissions" {
     google_project_iam_member.im_sa_eventarc_admin,
     google_project_iam_member.im_sa_build_editor,
     google_project_iam_member.im_sa_editor,
+    google_project_iam_member.cb_sa_connection_admin,
     google_secret_manager_secret_iam_member.cb_secret_accessor
   ]
 }
