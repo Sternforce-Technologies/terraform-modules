@@ -1,4 +1,5 @@
-# 1. Restore the Bucket for the placeholder code
+# 1. Bucket for initial placeholder code
+# This bucket stores the source code for the function
 resource "google_storage_bucket" "gcf_source_bucket" {
   name                        = "${var.project_id}-gcf-source-bucket"
   project                     = var.project_id
@@ -6,14 +7,37 @@ resource "google_storage_bucket" "gcf_source_bucket" {
   uniform_bucket_level_access = true
 }
 
-# 2. Restore the Placeholder Zip
-resource "google_storage_bucket_object" "placeholder_zip" {
-  name    = "placeholder.zip"
-  bucket  = google_storage_bucket.gcf_source_bucket.name
-  content = " " # Empty content is sufficient for bootstrap
+# 2. GENERATE a valid, minimal zip file
+# We need valid Go code so the initial Cloud Build succeeds.
+# This creates a 'main.go' file inside a zip archive.
+data "archive_file" "placeholder" {
+  type        = "zip"
+  output_path = "${path.module}/placeholder.zip"
+  
+  source {
+    content  = <<EOF
+package auditor
+
+import "context"
+
+// AuditResources is a placeholder to allow the initial function deployment to succeed.
+// The real code will be deployed by Cloud Build triggers later.
+func AuditResources(ctx context.Context, m interface{}) error { 
+    return nil 
+}
+EOF
+    filename = "main.go"
+  }
 }
 
-# 3. Update the Function to use storage_source (Bootstrap Mode)
+# 3. Upload the VALID zip file to the bucket
+resource "google_storage_bucket_object" "placeholder_zip" {
+  name   = "placeholder.zip"
+  bucket = google_storage_bucket.gcf_source_bucket.name
+  source = data.archive_file.placeholder.output_path
+}
+
+# 4. The Cloud Function
 resource "google_cloudfunctions2_function" "auditor_function" {
   name        = "im-global-auditor-go"
   project     = var.project_id
@@ -24,17 +48,17 @@ resource "google_cloudfunctions2_function" "auditor_function" {
     runtime     = "go125"
     entry_point = "AuditResources"
     
-    # Keep the custom build service account
+    # Use the Cloud Build Service Account for the build
     service_account = google_service_account.cb_sa.id
 
-    # --- CHANGE: Revert to Storage Source ---
+    # Bootstrap from the placeholder zip in Storage
+    # (Triggers will switch this to GitHub for future updates)
     source {
       storage_source {
         bucket = google_storage_bucket.gcf_source_bucket.name
         object = google_storage_bucket_object.placeholder_zip.name
       }
     }
-    # ----------------------------------------
   }
 
   service_config {
@@ -57,7 +81,7 @@ resource "google_cloudfunctions2_function" "auditor_function" {
   }
 }
 
-# Allow Auditor SA to be invoked by the Pub/Sub OIDC token
+# 5. Allow the Auditor Service Account to be invoked by Eventarc/PubSub
 resource "google_cloudfunctions2_function_iam_member" "invoker" {
   project        = var.project_id
   location       = google_cloudfunctions2_function.auditor_function.location
