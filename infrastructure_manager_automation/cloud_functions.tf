@@ -81,11 +81,12 @@ resource "google_cloudfunctions2_function" "auditor_function" {
   }
 }
 
-# 5. Allow the Auditor Service Account to be invoked by Eventarc/PubSub
-resource "google_cloudfunctions2_function_iam_member" "invoker" {
-  project        = var.project_id
-  location       = google_cloudfunctions2_function.auditor_function.location
-  cloud_function = google_cloudfunctions2_function.auditor_function.name
-  role           = "roles/run.invoker"
-  member         = "serviceAccount:${google_service_account.im_auditor_sa.email}"
+# Allow Auditor SA to be invoked by the Pub/Sub OIDC token
+# We must apply this to the underlying Cloud Run service, not the Function resource
+resource "google_cloud_run_service_iam_member" "invoker" {
+  project  = var.project_id
+  location = var.region
+  service  = google_cloudfunctions2_function.auditor_function.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.im_auditor_sa.email}"
 }
