@@ -206,6 +206,14 @@ resource "google_project_iam_member" "cb_sa_connection_admin" {
   member  = "serviceAccount:${google_service_account.cb_sa.email}"
 }
 
+# Allow the Cloud Build Service Agent (Robot) to impersonate the Build SA (cb-sa)
+# This is required for Triggers that specify a custom service account.
+resource "google_service_account_iam_member" "cb_sa_impersonation" {
+  service_account_id = google_service_account.cb_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
 resource "time_sleep" "wait_for_permissions" {
   create_duration = "60s"
 
