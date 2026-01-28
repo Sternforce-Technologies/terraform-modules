@@ -33,7 +33,7 @@ resource "google_cloudbuild_trigger" "im_apply" {
   }
 
   substitutions = {
-    _TF_VERSION            = "1.3.10"
+    _TF_VERSION            = "1.5.7"
     _REGION                = var.region
     _DEPLOYMENT_ID         = var.deployment_id
     _CONFIG_PATH           = var.config_path
@@ -89,7 +89,7 @@ resource "google_cloudbuild_trigger" "im_preview" {
   }
 
   substitutions = {
-    _TF_VERSION            = "1.3.10"
+    _TF_VERSION            = "1.5.7"
     _REGION                = var.region
     _DEPLOYMENT_ID         = var.deployment_id
     _CONFIG_PATH           = var.config_path
