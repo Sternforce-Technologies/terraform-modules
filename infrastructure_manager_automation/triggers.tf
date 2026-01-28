@@ -42,6 +42,10 @@ resource "google_cloudbuild_trigger" "im_apply" {
     _SERVICE_ACCOUNT_EMAIL = google_service_account.im_sa.email
   }
 
+  approval_config {
+     approval_required = false 
+  }
+
   depends_on = [
     google_secret_manager_secret_iam_member.cb_secret_accessor,
     google_cloudbuildv2_repository.github_repo,
@@ -94,6 +98,10 @@ resource "google_cloudbuild_trigger" "im_preview" {
     _SERVICE_ACCOUNT_EMAIL = google_service_account.im_sa.email
   }
 
+  approval_config {
+     approval_required = false 
+  }
+
   depends_on = [
     google_secret_manager_secret_iam_member.cb_secret_accessor,
     google_cloudbuildv2_repository.github_repo,
@@ -119,6 +127,10 @@ resource "google_cloudbuild_trigger" "redeploy_on_push" {
   
   # Only trigger if the auditor code changes
   included_files = ["infrastructure_manager_automation/im-audit/**"]
+
+  approval_config {
+     approval_required = false 
+  }
 
   depends_on = [
     google_secret_manager_secret_iam_member.cb_secret_accessor,
